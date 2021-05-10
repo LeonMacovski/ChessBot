@@ -57,7 +57,7 @@ async def move(ctx, move: str):
         await ctx.channel.send('Invalid move')
 
     if board.move((numbers[moveFrom[1]], letters[moveFrom[0]], numbers[moveTo[1]], letters[moveTo[0]]), turn) == 1:
-        turn = not turn
+        # turn = not turn
         await show_board(ctx)
 
     else:
