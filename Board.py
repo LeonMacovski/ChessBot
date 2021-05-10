@@ -17,11 +17,11 @@ class Board:
         self.state = [['#', '#', '#', '#', '#', '#', '#', '#'],
                       ['#', '#', '#', '#', '#', '#', '#', '#'],
                       ['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', 'queen', '#', '#', '#', '#'],
+                      ['#', '#', '#', '#', 'king', '#', '#', '#'],
                       ['#', '#', '#', '#', '#', '#', '#', '#'],
                       ['#', '#', '#', '#', '#', '#', '#', '#'],
                       ['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', '#', '#', '#', '#', '#']]
+                      ['#', '#', '#', '#', '#', 'Bqueen', '#', '#']]
 
         for i in range(8):
             row = []
@@ -63,13 +63,31 @@ class Board:
             return 0
 
         if move in legal:
-            self.cells[toX][toY].set_piece(self.cells[fromX][fromY].piece)
+            fromPiece = self.cells[fromX][fromY].piece
+            toPiece = self.cells[toX][toY].piece
+            self.cells[toX][toY].set_piece(fromPiece)
             self.cells[fromX][fromY].set_piece(Piece.EMPTY)
             self.update_checked()
+            if self.is_checked(turn):
+                self.cells[fromX][fromY].set_piece(fromPiece)
+                self.cells[toX][toY].set_piece(toPiece)
+                self.update_checked()
+                return 0
+
             return 1
 
         else:
             return 0
+
+    def is_checked(self, turn):
+        for i in range(8):
+            for j in range(8):
+                if turn and self.cells[i][j].piece == Piece.WHITEKING and self.cells[i][j].black_checked:
+                    return 1
+                if not turn and self.cells[i][j].piece == Piece.BLACKKING and self.cells[i][j].white_checked:
+                    return 1
+
+        return 0
 
     def update_checked(self):
         for i in range(8):
@@ -84,7 +102,7 @@ class Board:
                         self.cells[i - 1][j + 1].white_checked = True
                     if i > 0 and j > 0:
                         self.cells[i - 1][j - 1].white_checked = True
-                if self.cells[i][j].piece == Piece.BLACKPAWN:
+                elif self.cells[i][j].piece == Piece.BLACKPAWN:
                     if i < 7 and j < 7:
                         self.cells[i + 1][j + 1].black_checked = True
                     if i < 7 and j > 0:
@@ -272,7 +290,7 @@ class Board:
                             break
                         else:
                             self.cells[i1][j1].white_checked = True
-                elif self.cells[i][j].piece == Piece.WHITEQUEEN:
+                elif self.cells[i][j].piece == Piece.BLACKQUEEN:
                     for i1 in range(i + 1, 8):
                         if self.cells[i1][j].piece != Piece.EMPTY:
                             self.cells[i1][j].black_checked = True
@@ -321,6 +339,40 @@ class Board:
                             break
                         else:
                             self.cells[i1][j1].black_checked = True
+                elif self.cells[i][j].piece == Piece.WHITEKING:
+                    if i > 0:
+                        self.cells[i - 1][j].white_checked = True
+                    if i < 7:
+                        self.cells[i + 1][j].white_checked = True
+                    if j > 0:
+                        self.cells[i][j - 1].white_checked = True
+                    if j < 7:
+                        self.cells[i][j + 1].white_checked = True
+                    if i > 0 and j > 0:
+                        self.cells[i - 1][j - 1].white_checked = True
+                    if i > 0 and j < 7:
+                        self.cells[i - 1][j + 1].white_checked = True
+                    if i < 7 and j > 0:
+                        self.cells[i + 1][j - 1].white_checked = True
+                    if i < 7 and j < 7:
+                        self.cells[i + 1][j + 1].white_checked = True
+                elif self.cells[i][j].piece == Piece.BLACKKING:
+                    if i > 0:
+                        self.cells[i - 1][j].black_checked = True
+                    if i < 7:
+                        self.cells[i + 1][j].black_checked = True
+                    if j > 0:
+                        self.cells[i][j - 1].black_checked = True
+                    if j < 7:
+                        self.cells[i][j + 1].black_checked = True
+                    if i > 0 and j > 0:
+                        self.cells[i - 1][j - 1].black_checked = True
+                    if i > 0 and j < 7:
+                        self.cells[i - 1][j + 1].black_checked = True
+                    if i < 7 and j > 0:
+                        self.cells[i + 1][j - 1].black_checked = True
+                    if i < 7 and j < 7:
+                        self.cells[i + 1][j + 1].black_checked = True
 
     def is_legal(self, move):
         fromX = move[0]
@@ -500,7 +552,23 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-
+                    elif self.cells[i][j].piece == Piece.WHITEKING:
+                        if i > 0:
+                            legal_moves.append((i, j, i - 1, j))
+                        if i < 7:
+                            legal_moves.append((i, j, i + 1, j))
+                        if j > 0:
+                            legal_moves.append((i, j, i, j - 1))
+                        if j < 7:
+                            legal_moves.append((i, j, i, j + 1))
+                        if i > 0 and j > 0:
+                            legal_moves.append((i, j, i - 1, j - 1))
+                        if i > 0 and j < 7:
+                            legal_moves.append((i, j, i - 1, j + 1))
+                        if i < 7 and j > 0:
+                            legal_moves.append((i, j, i + 1, j - 1))
+                        if i < 7 and j < 7:
+                            legal_moves.append((i, j, i + 1, j + 1))
 
         else:
             for i in range(8):
@@ -663,6 +731,22 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-
+                    elif self.cells[i][j].piece == Piece.BLACKKING:
+                        if i > 0:
+                            legal_moves.append((i, j, i - 1, j))
+                        if i < 7:
+                            legal_moves.append((i, j, i + 1, j))
+                        if j > 0:
+                            legal_moves.append((i, j, i, j - 1))
+                        if j < 7:
+                            legal_moves.append((i, j, i, j + 1))
+                        if i > 0 and j > 0:
+                            legal_moves.append((i, j, i - 1, j - 1))
+                        if i > 0 and j < 7:
+                            legal_moves.append((i, j, i - 1, j + 1))
+                        if i < 7 and j > 0:
+                            legal_moves.append((i, j, i + 1, j - 1))
+                        if i < 7 and j < 7:
+                            legal_moves.append((i, j, i + 1, j + 1))
 
         return legal_moves

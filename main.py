@@ -10,7 +10,7 @@ board = Board.Board()
 white = None
 black = None
 
-turn = True
+turn = False
 
 
 @client.event
