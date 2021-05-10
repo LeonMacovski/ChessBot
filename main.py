@@ -73,6 +73,11 @@ async def reset(ctx):
 
 
 @client.command()
+async def print_checked(ctx):
+    board.print_checked()
+
+
+@client.command()
 async def start(ctx, opponent: discord.Member):
     global black, white
 

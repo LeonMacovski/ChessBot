@@ -46,6 +46,19 @@ class Board:
                 print(self.cells[i][j].piece.value, end='')
             print('\n')
 
+    def print_checked(self):
+        for i in range(8):
+            for j in range(8):
+                if self.cells[i][j].white_checked and self.cells[i][j].black_checked:
+                    print('A', end='')
+                elif self.cells[i][j].white_checked:
+                    print('W', end='')
+                elif self.cells[i][j].black_checked:
+                    print('B', end='')
+                else:
+                    print('-', end='')
+            print()
+
     def move(self, move, turn):
         fromX = move[0]
         fromY = move[1]
@@ -78,7 +91,71 @@ class Board:
                     if i > 0 and j < 7:
                         self.cells[i - 1][j + 1].white_checked = True
                     if i > 0 and j > 0:
-                        self.cells[i - 1][j - 1].black_checked = True
+                        self.cells[i - 1][j - 1].white_checked = True
+                if self.cells[i][j].piece == Piece.BLACKPAWN:
+                    if i < 7 and j < 7:
+                        self.cells[i + 1][j + 1].black_checked = True
+                    if i < 7 and j > 0:
+                        self.cells[i + 1][j - 1].black_checked = True
+                elif self.cells[i][j].piece == Piece.WHITEKNIGHT:
+                    if i + 2 <= 7 and j + 1 <= 7:
+                        self.cells[i + 2][j + 1].white_checked = True
+                    if i + 2 <= 7 and j - 1 >= 0:
+                        self.cells[i + 2][j - 1].white_checked = True
+                    if i - 2 >= 0 and j + 1 <= 7:
+                        self.cells[i - 2][j + 1].white_checked = True
+                    if i - 2 >= 0 and j - 1 >= 0:
+                        self.cells[i - 2][j - 1].white_checked = True
+                    if j + 2 <= 7 and i + 1 <= 7:
+                        self.cells[i + 1][j + 2].white_checked = True
+                    if j + 2 <= 7 and i - 1 >= 0:
+                        self.cells[i - 1][j + 2].white_checked = True
+                    if j - 2 >= 0 and i + 1 <= 7:
+                        self.cells[i + 1][j - 2].white_checked = True
+                    if j - 2 >= 0 and i - 1 >= 0:
+                        self.cells[i - 1][j - 2].white_checked = True
+                elif self.cells[i][j].piece == Piece.BLACKKNIGHT:
+                    if i + 2 <= 7 and j + 1 <= 7:
+                        self.cells[i + 2][j + 1].black_checked = True
+                    if i + 2 <= 7 and j - 1 >= 0:
+                        self.cells[i + 2][j - 1].black_checked = True
+                    if i - 2 >= 0 and j + 1 <= 7:
+                        self.cells[i - 2][j + 1].black_checked = True
+                    if i - 2 >= 0 and j - 1 >= 0:
+                        self.cells[i - 2][j - 1].black_checked = True
+                    if j + 2 <= 7 and i + 1 <= 7:
+                        self.cells[i + 1][j + 2].black_checked = True
+                    if j + 2 <= 7 and i - 1 >= 0:
+                        self.cells[i - 1][j + 2].black_checked = True
+                    if j - 2 >= 0 and i + 1 <= 7:
+                        self.cells[i + 1][j - 2].black_checked = True
+                    if j - 2 >= 0 and i - 1 >= 0:
+                        self.cells[i - 1][j - 2].black_checked = True
+                elif self.cells[i][j].piece == Piece.WHITEROOK:
+                    for i1 in range(i + 1, 8):
+                        if self.cells[i1][j].piece != Piece.EMPTY:
+                            self.cells[i][j].white_checked = True
+                            break
+                        else:
+                            self.cells[i][j].white_checked = True
+                    for i1 in reversed(range(0, i)):
+                        if self.cells[i1][j].piece != Piece.EMPTY:
+                            self.cells[i][j].white_checked = True
+                            break
+                        else:
+                            self.cells[i][j].white_checked = True
+                    for j1 in range(j + 1, 8):
+                        if self.cells[i][j1].piece != Piece.EMPTY:
+                            self.cells[i][j1].white_checked = True
+                            break
+                        else:
+                            self.cells[i][j1].white_checked = True
+                    for j1 in reversed(range(0, j)):
+                        if self.cells[i][j1].piece != Piece.EMPTY:
+                            self.cells[i][j1].white_checked = True
+                            break
+                        else:
+                            self.cells[i][j1].white_checked = True
 
     def is_legal(self, move):
         fromX = move[0]
@@ -122,13 +199,13 @@ class Board:
                         if j + 2 <= 7 and i + 1 <= 7 and self.cells[i + 1][j + 2].color != 'white':
                             legal_moves.append((i, j, i + 1, j + 2))
                         if j + 2 <= 7 and i - 1 >= 0 and self.cells[i - 1][j + 2].color != 'white':
-                            legal_moves.append((i, j, i + 1, j - 2))
-                        if j - 2 >= 0 and i + 1 <= 7 and self.cells[i + 1][j - 2].color != 'white':
                             legal_moves.append((i, j, i - 1, j + 2))
+                        if j - 2 >= 0 and i + 1 <= 7 and self.cells[i + 1][j - 2].color != 'white':
+                            legal_moves.append((i, j, i + 1, j - 2))
                         if j - 2 >= 0 and i - 1 >= 0 and self.cells[i - 1][j - 2].color != 'white':
                             legal_moves.append((i, j, i - 1, j - 2))
                     elif self.cells[i][j].piece == Piece.WHITEROOK:
-                        for i1 in range(i+1, 8):
+                        for i1 in range(i + 1, 8):
                             if self.cells[i1][j].color == 'white':
                                 break
                             elif self.cells[i1][j].color == 'black':
@@ -144,7 +221,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j))
-                        for j1 in range(j+1, 8):
+                        for j1 in range(j + 1, 8):
                             if self.cells[i][j1].color == 'white':
                                 break
                             elif self.cells[i][j1].color == 'black':
@@ -169,7 +246,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-                        for i1, j1 in zip(reversed(range(0, i)), range(j+1, 8)):
+                        for i1, j1 in zip(reversed(range(0, i)), range(j + 1, 8)):
                             if self.cells[i1][j1].color == 'white':
                                 break
                             elif self.cells[i1][j1].color == 'black':
@@ -177,7 +254,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-                        for i1, j1 in zip(range(i+1, 8), reversed(range(0, j))):
+                        for i1, j1 in zip(range(i + 1, 8), reversed(range(0, j))):
                             if self.cells[i1][j1].color == 'white':
                                 break
                             elif self.cells[i1][j1].color == 'black':
@@ -185,7 +262,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-                        for i1, j1 in zip(range(i+1, 8), range(j+1, 8)):
+                        for i1, j1 in zip(range(i + 1, 8), range(j + 1, 8)):
                             if self.cells[i1][j1].color == 'white':
                                 break
                             elif self.cells[i1][j1].color == 'black':
@@ -219,13 +296,13 @@ class Board:
                         if j + 2 <= 7 and i + 1 <= 7 and self.cells[i + 1][j + 2].color != 'black':
                             legal_moves.append((i, j, i + 1, j + 2))
                         if j + 2 <= 7 and i - 1 >= 0 and self.cells[i - 1][j + 2].color != 'black':
-                            legal_moves.append((i, j, i + 1, j - 2))
-                        if j - 2 >= 0 and i + 1 <= 7 and self.cells[i + 1][j - 2].color != 'black':
                             legal_moves.append((i, j, i - 1, j + 2))
+                        if j - 2 >= 0 and i + 1 <= 7 and self.cells[i + 1][j - 2].color != 'black':
+                            legal_moves.append((i, j, i + 1, j - 2))
                         if j - 2 >= 0 and i - 1 >= 0 and self.cells[i - 1][j - 2].color != 'black':
                             legal_moves.append((i, j, i - 1, j - 2))
                     elif self.cells[i][j].piece == Piece.BLACKROOK:
-                        for i1 in range(i+1, 8):
+                        for i1 in range(i + 1, 8):
                             if self.cells[i1][j].color == 'black':
                                 break
                             elif self.cells[i1][j].color == 'white':
@@ -241,7 +318,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j))
-                        for j1 in range(j+1, 8):
+                        for j1 in range(j + 1, 8):
                             if self.cells[i][j1].color == 'black':
                                 break
                             elif self.cells[i][j1].color == 'white':
@@ -266,7 +343,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-                        for i1, j1 in zip(reversed(range(0, i)), range(j+1, 8)):
+                        for i1, j1 in zip(reversed(range(0, i)), range(j + 1, 8)):
                             if self.cells[i1][j1].color == 'black':
                                 break
                             elif self.cells[i1][j1].color == 'white':
@@ -274,7 +351,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-                        for i1, j1 in zip(range(i+1, 8), reversed(range(0, j))):
+                        for i1, j1 in zip(range(i + 1, 8), reversed(range(0, j))):
                             if self.cells[i1][j1].color == 'black':
                                 break
                             elif self.cells[i1][j1].color == 'white':
@@ -282,7 +359,7 @@ class Board:
                                 break
                             else:
                                 legal_moves.append((i, j, i1, j1))
-                        for i1, j1 in zip(range(i+1, 8), range(j+1, 8)):
+                        for i1, j1 in zip(range(i + 1, 8), range(j + 1, 8)):
                             if self.cells[i1][j1].color == 'black':
                                 break
                             elif self.cells[i1][j1].color == 'white':
