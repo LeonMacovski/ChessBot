@@ -10,7 +10,7 @@ board = Board.Board()
 white = None
 black = None
 
-turn = False
+turn = True
 
 
 @client.event
@@ -32,17 +32,17 @@ async def move(ctx, move: str):
     global board
     global turn
 
-    # if white is None and black is None:
-    #     await ctx.channel.send('No game is currently running')
-    #     return
-    #
-    # elif ctx.message.author != white and ctx.message.author != black:
-    #     await ctx.channel.send('You are not a player in this game')
-    #     return
-    #
-    # elif (ctx.message.author == white and turn == False) or (ctx.message.author == black and turn == True):
-    #     await ctx.channel.send('It is not your turn')
-    #     return
+    if white is None and black is None:
+        await ctx.channel.send('No game is currently running')
+        return
+
+    elif ctx.message.author != white and ctx.message.author != black:
+        await ctx.channel.send('You are not a player in this game')
+        return
+
+    elif (ctx.message.author == white and turn == False) or (ctx.message.author == black and turn == True):
+        await ctx.channel.send('It is not your turn')
+        return
 
     letters = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
     numbers = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
@@ -57,8 +57,14 @@ async def move(ctx, move: str):
         await ctx.channel.send('Invalid move')
 
     if board.move((numbers[moveFrom[1]], letters[moveFrom[0]], numbers[moveTo[1]], letters[moveTo[0]]), turn) == 1:
-        # turn = not turn
+        turn = not turn
         await show_board(ctx)
+        if board.winner == 'white':
+            await ctx.channel.send("White has won!")
+            await end(ctx)
+        elif board.winner == 'black':
+            await ctx.channel.send("Black has won!")
+            await end(ctx)
 
     else:
         await ctx.channel.send('Invalid move')

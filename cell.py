@@ -1,5 +1,6 @@
 from Piece import Piece
 
+
 class Cell:
     def __init__(self, pos, piece=Piece.EMPTY):
         self.piece = piece

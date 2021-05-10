@@ -4,6 +4,7 @@ from cell import Cell
 
 class Board:
     def __init__(self):
+        self.winner = None
         self.cells = []
         self.state = [['Brook', 'Bknight', 'Bbishop', 'Bqueen', 'Bking', 'Bbishop', 'Bknight', 'Brook'],
                       ['Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn'],
@@ -14,14 +15,14 @@ class Board:
                       ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
                       ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook']]
 
-        self.state = [['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', '#', 'king', '#', '#', '#'],
-                      ['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', '#', '#', '#', '#', '#'],
-                      ['#', '#', '#', '#', '#', 'Bqueen', '#', '#']]
+        # self.state = [['#', '#', '#', '#', 'king', '#', '#', '#'],
+        #               ['Bqueen', 'Brook', '#', '#', '#', '#', '#', '#'],
+        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
+        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
+        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
+        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
+        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
+        #               ['#', '#', '#', '#', '#', '#', '#', '#']]
 
         for i in range(8):
             row = []
@@ -57,10 +58,10 @@ class Board:
         toX = move[2]
         toY = move[3]
 
-        legal = self.generate_moves(turn)
-
         if not self.is_legal(move):
             return 0
+
+        legal = self.generate_moves(turn)
 
         if move in legal:
             fromPiece = self.cells[fromX][fromY].piece
@@ -68,26 +69,55 @@ class Board:
             self.cells[toX][toY].set_piece(fromPiece)
             self.cells[fromX][fromY].set_piece(Piece.EMPTY)
             self.update_checked()
-            if self.is_checked(turn):
-                self.cells[fromX][fromY].set_piece(fromPiece)
-                self.cells[toX][toY].set_piece(toPiece)
-                self.update_checked()
-                return 0
+            temp = self.generate_moves(not turn)
+            if len(temp) == 0:
+                self.winner = f'{"white" if turn else "black"}'
 
             return 1
 
         else:
             return 0
 
-    def is_checked(self, turn):
-        for i in range(8):
-            for j in range(8):
-                if turn and self.cells[i][j].piece == Piece.WHITEKING and self.cells[i][j].black_checked:
-                    return 1
-                if not turn and self.cells[i][j].piece == Piece.BLACKKING and self.cells[i][j].white_checked:
-                    return 1
+    def filter_moves(self, turn, moves):
+        new_moves = []
+        for move in moves:
+            fromX = move[0]
+            fromY = move[1]
+            toX = move[2]
+            toY = move[3]
 
-        return 0
+            fromPiece = self.cells[fromX][fromY].piece
+            toPiece = self.cells[toX][toY].piece
+            self.cells[toX][toY].set_piece(fromPiece)
+            self.cells[fromX][fromY].set_piece(Piece.EMPTY)
+            self.update_checked()
+
+            should_include = True
+
+            for i in range(8):
+                for j in range(8):
+                    if turn and self.cells[i][j].piece == Piece.WHITEKING and self.cells[i][j].black_checked:
+                        self.cells[fromX][fromY].set_piece(fromPiece)
+                        self.cells[toX][toY].set_piece(toPiece)
+                        self.update_checked()
+                        should_include = False
+                        break
+                    if not turn and self.cells[i][j].piece == Piece.BLACKKING and self.cells[i][j].white_checked:
+                        self.cells[fromX][fromY].set_piece(fromPiece)
+                        self.cells[toX][toY].set_piece(toPiece)
+                        self.update_checked()
+                        should_include = False
+                        break
+                if not should_include:
+                    break
+
+            if should_include:
+                self.cells[fromX][fromY].set_piece(fromPiece)
+                self.cells[toX][toY].set_piece(toPiece)
+                self.update_checked()
+                new_moves.append(move)
+
+        return new_moves
 
     def update_checked(self):
         for i in range(8):
@@ -553,21 +583,21 @@ class Board:
                             else:
                                 legal_moves.append((i, j, i1, j1))
                     elif self.cells[i][j].piece == Piece.WHITEKING:
-                        if i > 0:
+                        if i > 0 and self.cells[i-1][j].color != 'white':
                             legal_moves.append((i, j, i - 1, j))
-                        if i < 7:
+                        if i < 7 and self.cells[i+1][j].color != 'white':
                             legal_moves.append((i, j, i + 1, j))
-                        if j > 0:
+                        if j > 0 and self.cells[i][j-1].color != 'white':
                             legal_moves.append((i, j, i, j - 1))
-                        if j < 7:
+                        if j < 7 and self.cells[i][j+1].color != 'white':
                             legal_moves.append((i, j, i, j + 1))
-                        if i > 0 and j > 0:
+                        if i > 0 and j > 0 and self.cells[i-1][j-1].color != 'white':
                             legal_moves.append((i, j, i - 1, j - 1))
-                        if i > 0 and j < 7:
+                        if i > 0 and j < 7 and self.cells[i-1][j+1].color != 'white':
                             legal_moves.append((i, j, i - 1, j + 1))
-                        if i < 7 and j > 0:
+                        if i < 7 and j > 0 and self.cells[i+1][j-1].color != 'white':
                             legal_moves.append((i, j, i + 1, j - 1))
-                        if i < 7 and j < 7:
+                        if i < 7 and j < 7 and self.cells[i+1][j+1].color != 'white':
                             legal_moves.append((i, j, i + 1, j + 1))
 
         else:
@@ -732,21 +762,21 @@ class Board:
                             else:
                                 legal_moves.append((i, j, i1, j1))
                     elif self.cells[i][j].piece == Piece.BLACKKING:
-                        if i > 0:
+                        if i > 0 and self.cells[i-1][j].color != 'black':
                             legal_moves.append((i, j, i - 1, j))
-                        if i < 7:
+                        if i < 7 and self.cells[i+1][j].color != 'black':
                             legal_moves.append((i, j, i + 1, j))
-                        if j > 0:
+                        if j > 0 and self.cells[i][j-1].color != 'black':
                             legal_moves.append((i, j, i, j - 1))
-                        if j < 7:
+                        if j < 7 and self.cells[i][j+1].color != 'black':
                             legal_moves.append((i, j, i, j + 1))
-                        if i > 0 and j > 0:
+                        if i > 0 and j > 0 and self.cells[i-1][j-1].color != 'black':
                             legal_moves.append((i, j, i - 1, j - 1))
-                        if i > 0 and j < 7:
+                        if i > 0 and j < 7 and self.cells[i-1][j+1].color != 'black':
                             legal_moves.append((i, j, i - 1, j + 1))
-                        if i < 7 and j > 0:
+                        if i < 7 and j > 0 and self.cells[i+1][j-1].color != 'black':
                             legal_moves.append((i, j, i + 1, j - 1))
-                        if i < 7 and j < 7:
+                        if i < 7 and j < 7 and self.cells[i+1][j+1].color != 'black':
                             legal_moves.append((i, j, i + 1, j + 1))
 
-        return legal_moves
+        return self.filter_moves(turn, legal_moves)

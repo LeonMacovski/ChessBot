@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Piece(Enum):
     WHITEPAWN = 'pawn'
     BLACKPAWN = 'Bpawn'
