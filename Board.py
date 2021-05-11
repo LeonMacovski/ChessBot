@@ -201,6 +201,12 @@ class Board:
                 self.cells[toX - 1][toY].set_piece(Piece.EMPTY)
                 self.white_en_passant_file = None
 
+            if fromPiece == Piece.WHITEPAWN and toX == 0:
+                self.cells[toX][toY].piece = Piece.WHITEQUEEN
+
+            if fromPiece == Piece.BLACKPAWN and toX == 7:
+                self.cells[toX][toY].piece = Piece.BLACKQUEEN
+
             temp = self.generate_moves(not turn)
             if len(temp) == 0:
                 self.winner = f'{"white" if turn else "black"}'
