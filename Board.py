@@ -4,7 +4,15 @@ from cell import Cell
 
 class Board:
     def __init__(self):
+        self.black_en_passant_file = None
+        self.white_en_passant_file = None
         self.winner = None
+        self.white_king_moved = False
+        self.black_king_moved = False
+        self.white_h_rook_moved = False
+        self.white_a_rook_moved = False
+        self.black_h_rook_moved = False
+        self.black_a_rook_moved = False
         self.cells = []
         self.state = [['Brook', 'Bknight', 'Bbishop', 'Bqueen', 'Bking', 'Bbishop', 'Bknight', 'Brook'],
                       ['Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn', 'Bpawn'],
@@ -14,15 +22,6 @@ class Board:
                       ['#', '#', '#', '#', '#', '#', '#', '#'],
                       ['pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn', 'pawn'],
                       ['rook', 'knight', 'bishop', 'queen', 'king', 'bishop', 'knight', 'rook']]
-
-        # self.state = [['#', '#', '#', '#', 'king', '#', '#', '#'],
-        #               ['Bqueen', 'Brook', '#', '#', '#', '#', '#', '#'],
-        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
-        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
-        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
-        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
-        #               ['#', '#', '#', '#', '#', '#', '#', '#'],
-        #               ['#', '#', '#', '#', '#', '#', '#', '#']]
 
         for i in range(8):
             row = []
@@ -53,10 +52,105 @@ class Board:
             print()
 
     def move(self, move, turn):
-        fromX = move[0]
-        fromY = move[1]
-        toX = move[2]
-        toY = move[3]
+        move = move.lower()
+        if move == '0-0':
+            if turn:
+                if self.white_king_moved or self.white_h_rook_moved:
+                    return 0
+                if self.cells[7][7].piece != Piece.WHITEROOK:
+                    return 0
+                if self.cells[7][4].piece != Piece.WHITEKING:
+                    return 0
+                if self.cells[7][5].piece != Piece.EMPTY or self.cells[7][6].piece != Piece.EMPTY:
+                    return 0
+                if self.cells[7][4].black_checked or self.cells[7][5].black_checked or self.cells[7][6].black_checked:
+                    return 0
+                self.cells[7][4].piece = Piece.EMPTY
+                self.cells[7][5].piece = Piece.WHITEROOK
+                self.cells[7][6].piece = Piece.WHITEKING
+                self.cells[7][7].piece = Piece.EMPTY
+                self.white_king_moved = True
+                self.white_h_rook_moved = True
+                return 1
+
+            else:
+                if self.black_king_moved or self.black_h_rook_moved:
+                    return 0
+                if self.cells[0][7].piece != Piece.BLACKROOK:
+                    return 0
+                if self.cells[0][4].piece != Piece.BLACKKING:
+                    return 0
+                if self.cells[0][5].piece != Piece.EMPTY or self.cells[0][6].piece != Piece.EMPTY:
+                    return 0
+                if self.cells[0][4].white_checked or self.cells[0][5].white_checked or self.cells[0][6].white_checked:
+                    return 0
+                self.cells[0][4].piece = Piece.EMPTY
+                self.cells[0][5].piece = Piece.BLACKROOK
+                self.cells[0][6].piece = Piece.BLACKKING
+                self.cells[0][7].piece = Piece.EMPTY
+                self.black_king_moved = True
+                self.black_h_rook_moved = True
+                return 1
+
+        if move == '0-0-0':
+            if turn:
+                if self.white_king_moved or self.white_a_rook_moved:
+                    return 0
+                if self.cells[7][0].piece != Piece.WHITEROOK:
+                    return 0
+                if self.cells[7][4].piece != Piece.WHITEKING:
+                    return 0
+                if self.cells[7][1].piece != Piece.EMPTY or self.cells[7][2].piece != Piece.EMPTY or self.cells[7][
+                    3].piece != Piece.EMPTY:
+                    return 0
+                if self.cells[7][1].black_checked or self.cells[7][2].black_checked or self.cells[7][3].black_checked or \
+                        self.cells[7][4].black_checked:
+                    return 0
+                self.cells[7][0].piece = Piece.EMPTY
+                self.cells[7][2].piece = Piece.WHITEKING
+                self.cells[7][3].piece = Piece.WHITEROOK
+                self.cells[7][4].piece = Piece.EMPTY
+                self.white_king_moved = True
+                self.white_a_rook_moved = True
+                return 1
+
+            else:
+                if self.black_king_moved or self.black_a_rook_moved:
+                    return 0
+                if self.cells[0][0].piece != Piece.BLACKROOK:
+                    return 0
+                if self.cells[0][4].piece != Piece.BLACKKING:
+                    return 0
+                if self.cells[0][1].piece != Piece.EMPTY or self.cells[0][2].piece != Piece.EMPTY or self.cells[0][
+                    3].piece != Piece.EMPTY:
+                    return 0
+                if self.cells[0][1].white_checked or self.cells[0][2].white_checked or self.cells[0][3].white_checked or \
+                        self.cells[0][4].white_checked:
+                    return 0
+                self.cells[7][0].piece = Piece.EMPTY
+                self.cells[7][2].piece = Piece.BLACKKING
+                self.cells[7][3].piece = Piece.BLACKROOK
+                self.cells[7][4].piece = Piece.EMPTY
+                self.black_king_moved = True
+                self.black_a_rook_moved = True
+                return 1
+
+        letters = {'a': 0, 'b': 1, 'c': 2, 'd': 3, 'e': 4, 'f': 5, 'g': 6, 'h': 7}
+        numbers = {'1': 7, '2': 6, '3': 5, '4': 4, '5': 3, '6': 2, '7': 1, '8': 0}
+        if len(move) != 4:
+            return 0
+        moveFrom = move[:2]
+        moveTo = move[2:]
+        if moveFrom[0] not in letters or moveTo[0] not in letters or moveFrom[1] not in numbers or moveTo[
+            1] not in numbers:
+            return 0
+
+        fromY = letters[moveFrom[0]]
+        fromX = numbers[moveFrom[1]]
+        toY = letters[moveTo[0]]
+        toX = numbers[moveTo[1]]
+
+        move = (numbers[moveFrom[1]], letters[moveFrom[0]], numbers[moveTo[1]], letters[moveTo[0]])
 
         if not self.is_legal(move):
             return 0
@@ -69,6 +163,44 @@ class Board:
             self.cells[toX][toY].set_piece(fromPiece)
             self.cells[fromX][fromY].set_piece(Piece.EMPTY)
             self.update_checked()
+
+            if fromPiece == Piece.WHITEKING:
+                self.white_king_moved = True
+            if fromPiece == Piece.BLACKKING:
+                self.black_king_moved = True
+            if fromX == 7 and fromY == 0:
+                self.white_a_rook_moved = True
+            if fromX == 0 and fromY == 0:
+                self.black_a_rook_moved = True
+            if fromX == 7 and fromY == 7:
+                self.white_h_rook_moved = True
+            if fromX == 0 and fromY == 7:
+                self.black_h_rook_moved = True
+
+            white_flag = True
+            black_flag = True
+
+            if fromPiece == Piece.WHITEPAWN and fromX == 6 and toX == 4:
+                self.white_en_passant_file = fromY
+                white_flag = False
+
+            if fromPiece == Piece.BLACKPAWN and fromX == 1 and toX == 3:
+                self.black_en_passant_file = fromY
+                black_flag = False
+
+            if white_flag:
+                self.white_en_passant_file = None
+            if black_flag:
+                self.black_en_passant_file = None
+
+            if fromPiece == Piece.WHITEPAWN and fromY != toY and toPiece == Piece.EMPTY:
+                self.cells[toX + 1][toY].set_piece(Piece.EMPTY)
+                self.black_en_passant_file = None
+
+            if fromPiece == Piece.BLACKPAWN and fromY != toY and toPiece == Piece.EMPTY:
+                self.cells[toX - 1][toY].set_piece(Piece.EMPTY)
+                self.white_en_passant_file = None
+
             temp = self.generate_moves(not turn)
             if len(temp) == 0:
                 self.winner = f'{"white" if turn else "black"}'
@@ -434,6 +566,15 @@ class Board:
                             legal_moves.append((i, j, i - 1, j + 1))
                         if i > 0 and j > 0 and self.cells[i - 1][j - 1].color == 'black':
                             legal_moves.append((i, j, i - 1, j - 1))
+                        if i == 3 and j > 0 and self.cells[i][
+                            j - 1].piece == Piece.BLACKPAWN and self.black_en_passant_file == j - 1:
+                            legal_moves.append((i, j, i - 1, j - 1))
+                        if i == 3 and j < 7 and self.cells[i][
+                            j + 1].piece == Piece.BLACKPAWN and self.black_en_passant_file == j + 1:
+                            legal_moves.append((i, j, i - 1, j + 1))
+
+
+
                     elif self.cells[i][j].piece == Piece.WHITEKNIGHT:
                         if i + 2 <= 7 and j + 1 <= 7 and self.cells[i + 2][j + 1].color != 'white':
                             legal_moves.append((i, j, i + 2, j + 1))
@@ -583,21 +724,21 @@ class Board:
                             else:
                                 legal_moves.append((i, j, i1, j1))
                     elif self.cells[i][j].piece == Piece.WHITEKING:
-                        if i > 0 and self.cells[i-1][j].color != 'white':
+                        if i > 0 and self.cells[i - 1][j].color != 'white':
                             legal_moves.append((i, j, i - 1, j))
-                        if i < 7 and self.cells[i+1][j].color != 'white':
+                        if i < 7 and self.cells[i + 1][j].color != 'white':
                             legal_moves.append((i, j, i + 1, j))
-                        if j > 0 and self.cells[i][j-1].color != 'white':
+                        if j > 0 and self.cells[i][j - 1].color != 'white':
                             legal_moves.append((i, j, i, j - 1))
-                        if j < 7 and self.cells[i][j+1].color != 'white':
+                        if j < 7 and self.cells[i][j + 1].color != 'white':
                             legal_moves.append((i, j, i, j + 1))
-                        if i > 0 and j > 0 and self.cells[i-1][j-1].color != 'white':
+                        if i > 0 and j > 0 and self.cells[i - 1][j - 1].color != 'white':
                             legal_moves.append((i, j, i - 1, j - 1))
-                        if i > 0 and j < 7 and self.cells[i-1][j+1].color != 'white':
+                        if i > 0 and j < 7 and self.cells[i - 1][j + 1].color != 'white':
                             legal_moves.append((i, j, i - 1, j + 1))
-                        if i < 7 and j > 0 and self.cells[i+1][j-1].color != 'white':
+                        if i < 7 and j > 0 and self.cells[i + 1][j - 1].color != 'white':
                             legal_moves.append((i, j, i + 1, j - 1))
-                        if i < 7 and j < 7 and self.cells[i+1][j+1].color != 'white':
+                        if i < 7 and j < 7 and self.cells[i + 1][j + 1].color != 'white':
                             legal_moves.append((i, j, i + 1, j + 1))
 
         else:
@@ -613,6 +754,12 @@ class Board:
                             legal_moves.append((i, j, i + 1, j + 1))
                         if i < 7 and j > 0 and self.cells[i + 1][j - 1].color == 'white':
                             legal_moves.append((i, j, i + 1, j - 1))
+                        if i == 4 and j > 0 and self.cells[i][
+                            j - 1].piece == Piece.WHITEPAWN and self.white_en_passant_file == j - 1:
+                            legal_moves.append((i, j, i + 1, j - 1))
+                        if i == 4 and j < 7 and self.cells[i][
+                            j + 1].piece == Piece.WHITEPAWN and self.white_en_passant_file == j + 1:
+                            legal_moves.append((i, j, i + 1, j + 1))
                     elif self.cells[i][j].piece == Piece.BLACKKNIGHT:
                         if i + 2 <= 7 and j + 1 <= 7 and self.cells[i + 2][j + 1].color != 'black':
                             legal_moves.append((i, j, i + 2, j + 1))
@@ -762,21 +909,21 @@ class Board:
                             else:
                                 legal_moves.append((i, j, i1, j1))
                     elif self.cells[i][j].piece == Piece.BLACKKING:
-                        if i > 0 and self.cells[i-1][j].color != 'black':
+                        if i > 0 and self.cells[i - 1][j].color != 'black':
                             legal_moves.append((i, j, i - 1, j))
-                        if i < 7 and self.cells[i+1][j].color != 'black':
+                        if i < 7 and self.cells[i + 1][j].color != 'black':
                             legal_moves.append((i, j, i + 1, j))
-                        if j > 0 and self.cells[i][j-1].color != 'black':
+                        if j > 0 and self.cells[i][j - 1].color != 'black':
                             legal_moves.append((i, j, i, j - 1))
-                        if j < 7 and self.cells[i][j+1].color != 'black':
+                        if j < 7 and self.cells[i][j + 1].color != 'black':
                             legal_moves.append((i, j, i, j + 1))
-                        if i > 0 and j > 0 and self.cells[i-1][j-1].color != 'black':
+                        if i > 0 and j > 0 and self.cells[i - 1][j - 1].color != 'black':
                             legal_moves.append((i, j, i - 1, j - 1))
-                        if i > 0 and j < 7 and self.cells[i-1][j+1].color != 'black':
+                        if i > 0 and j < 7 and self.cells[i - 1][j + 1].color != 'black':
                             legal_moves.append((i, j, i - 1, j + 1))
-                        if i < 7 and j > 0 and self.cells[i+1][j-1].color != 'black':
+                        if i < 7 and j > 0 and self.cells[i + 1][j - 1].color != 'black':
                             legal_moves.append((i, j, i + 1, j - 1))
-                        if i < 7 and j < 7 and self.cells[i+1][j+1].color != 'black':
+                        if i < 7 and j < 7 and self.cells[i + 1][j + 1].color != 'black':
                             legal_moves.append((i, j, i + 1, j + 1))
 
         return self.filter_moves(turn, legal_moves)
