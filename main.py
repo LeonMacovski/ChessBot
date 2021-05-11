@@ -15,6 +15,7 @@ turn = True
 
 last_image = None
 
+
 @client.event
 async def on_ready():
     print('ready')
@@ -25,10 +26,15 @@ async def on_ready():
 
 @client.command()
 async def show_board(ctx):
+    '''
+    Prints the current board to the channel if there is a game running
+    :param ctx:
+    :return:
+    '''
     global last_image
-    # if white is None and black is None:
-    #     await ctx.channel.send('No game is currently running')
-    #     return
+    if white is None and black is None:
+        await ctx.channel.send('No game is currently running')
+        return
     bg.generate_board(board)
 
     if turn:
@@ -45,6 +51,12 @@ async def show_board(ctx):
 
 @client.command()
 async def move(ctx, move: str):
+    '''
+    Moves a piece. The move sintax is <letter><number><letter><number> ex. a2a4 to move the piece on a2 to a4
+    :param ctx:
+    :param move:
+    :return:
+    '''
     global board
     global turn
 
@@ -76,6 +88,11 @@ async def move(ctx, move: str):
 
 @client.command()
 async def reset(ctx):
+    '''
+    Resets the board position. Can only be done by the players of the game
+    :param ctx:
+    :return:
+    '''
     if white is None and black is None:
         await ctx.channel.send('No game is currently running')
         return
@@ -91,6 +108,12 @@ async def reset(ctx):
 
 @client.command()
 async def start(ctx, opponent: discord.Member):
+    '''
+    Starts a game with yourself and the person you tagged. The person who started the game is white
+    :param ctx:
+    :param opponent:
+    :return:
+    '''
     global black, white
 
     white = ctx.message.author
@@ -107,6 +130,11 @@ async def start(ctx, opponent: discord.Member):
 
 @client.command()
 async def end(ctx):
+    '''
+    Ends the game if there is one
+    :param ctx:
+    :return:
+    '''
     global board
 
     if black is None or white is None:
@@ -120,4 +148,6 @@ async def end(ctx):
         await ctx.channel.send('Only the players can end the game')
 
 
-client.run('ODQwMjc5MDUxNTI3NjUxMzQ5.YJV42Q.hllVtsxQT7u0jR0SSwPD5Qz7D6Y')
+token = '' #enter your bot token
+client.run(token)
+
